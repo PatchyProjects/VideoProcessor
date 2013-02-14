@@ -11,20 +11,26 @@
 
 using namespace cv;
 using std::cout;
+using std::cin;
 using std::endl;
 using std::ofstream;
 
 int main(int argc, char* argv[])
 {
-	string videoFile = "testColorMix.avi";
-   // VideoCapture cap(0); // open the default camera
-	VideoCapture cap(videoFile);
+	//string videoFile = "testColorMix.avi";
+	string videoFile;
+	cout<<"Enter Video File Name (ex. testColorMix.avi): ";
+	std::cin>>videoFile;
+	cout<<"Opening "<<videoFile<<"..."<<endl;
+	VideoCapture cap(videoFile);		//Open Video File
 	if(!cap.isOpened())  // check if we succeeded
 	{
 		cout<<"Error Opening Video"<<endl;
         return -1;
 	}
-
+	cout<<"Video Opened Successfully!"<<endl;
+	
+	cout<<"Creating CSV File..."<<endl;
 	ofstream frameFile;
 	frameFile.open ("frameFile.txt");
 	if (!frameFile.is_open()) //error opening writefile
@@ -32,12 +38,12 @@ int main(int argc, char* argv[])
 		cout<<"Error Opening CSV file"<<endl;
 		return -1;
 	}
-    
 	
 	FrameProcessor processFrame;
 
     namedWindow("video",1);
 
+	cout<<"Processing Video, Please Wait..."<<endl;
 	int frameCount = cap.get(CV_CAP_PROP_FRAME_COUNT);
 	for(int i = 0; i < frameCount; i++) 
     {
@@ -54,19 +60,15 @@ int main(int argc, char* argv[])
 			frameFile<<processFrame.rFrameVals[j]<<","<<processFrame.gFrameVals[j]<<","<<processFrame.bFrameVals[j]<<" ";
 		}
 		frameFile<<endl; 
-		
-		char c = waitKey(30);
-		if ('a' <= c && c <= 'z')
-		{
-			cout << "the input key is " << c << endl;
-		}
-		if(c == 'q') break;
-		else if(c != -1)
-		{
-			processFrame.setKey(c);
-		} 
+
     }
     // the camera will be deinitialized automatically in VideoCapture destructor
 	frameFile.close();
+	cout<<"Number of frames processed: "<<frameCount<<endl;
+	cout<<"Approx. length of video: "<<frameCount/30<<" seconds"<<endl;
+
+	int waiting;
+	cout<<"Video Processing Complete!";
+	std::cin>>waiting;
     return 0;
 }
