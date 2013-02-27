@@ -1,6 +1,20 @@
 #include <cv.h>
 #include "Image.h"
+//#include "Rect.h"
 #include <vector>
+#include <iostream>
+
+
+using namespace std;
+
+/* Bounderies for area of LED locations */
+struct LED
+{
+	int topX;
+	int topY;
+	int bottomX;
+	int bottomY;
+};
 
 class FrameProcessor
 {
@@ -11,10 +25,43 @@ public:
 		//make a new window to show our processed results
 		namedWindow("processed",1);
 	}
-	
+	//  Rect myRect = new Rect(0,0,15,15); 
+	vector<LED> ledLocationVec;
 	vector<int> rFrameVals;
 	vector<int> bFrameVals;
 	vector<int> gFrameVals;
+
+	void printLocations()
+	{
+		for(int i = 0; i<ledLocationVec.size(); i++)
+		{
+			cout<<"LED"<<i<<endl;
+			cout<<"Top("<<ledLocationVec[i].topX<<","<<ledLocationVec[i].topY<<")"<<endl;
+			cout<<"Bottom("<<ledLocationVec[i].bottomX<<","<<ledLocationVec[i].bottomY<<")"<<endl;
+		}
+	}
+
+	void basicLayout(Mat& frame)
+	{	
+		processed(frame);
+		int HEIGHT = processed.getHeight();
+		int WIDTH = processed.getWidth();
+		cout<<"height: "<<HEIGHT<<"width: "<<WIDTH<<endl;
+		for(int i = 0; i<16; i++)
+		{
+			int topX = WIDTH/4*(i%4);
+			int topY = HEIGHT/4*((i/4)%4);
+			int bottomX = topX + WIDTH/4;
+			int bottomY = topY + HEIGHT/4;
+			LED tempLED;
+			tempLED.topX = topX;
+			tempLED.topY = topY;
+			tempLED.bottomX = bottomX;
+			tempLED.bottomY = bottomY;
+			
+			ledLocationVec.push_back(tempLED);
+		}
+	}
 	
 	bool doWork(Mat& frame)
 	{
@@ -57,6 +104,7 @@ public:
 		gFrameVals = gVec;
 		
 		int ledLoc = 0; //led location, max = 16;
+		
 		for(int i = 0; i<4; i++)
 		{
 			for(int j = 0; j<4; j++)

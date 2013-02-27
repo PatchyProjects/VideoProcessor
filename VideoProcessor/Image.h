@@ -2,7 +2,7 @@
 #include <cv.h>
 using namespace cv;
 
-#include "Rect.h"
+//#include "Rect.h"
 #include "Color.h"
 
 /**************

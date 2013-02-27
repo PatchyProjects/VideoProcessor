@@ -45,11 +45,15 @@ int main(int argc, char* argv[])
 
 	cout<<"Processing Video, Please Wait..."<<endl;
 	int frameCount = cap.get(CV_CAP_PROP_FRAME_COUNT);
-	for(int i = 0; i < frameCount; i++) 
+
+	Mat firstFrame;
+	cap >> firstFrame;
+	processFrame.basicLayout(firstFrame);
+	processFrame.printLocations();
+	for(int i = 1; i < frameCount; i++) 
     {
         Mat frame;
         cap >> frame; // get new frame from video
-
 
         imshow("video", frame);
 
@@ -62,7 +66,7 @@ int main(int argc, char* argv[])
 		frameFile<<endl; 
 
     }
-    // the camera will be deinitialized automatically in VideoCapture destructor
+    
 	frameFile.close();
 	cout<<"Number of frames processed: "<<frameCount<<endl;
 	cout<<"Approx. length of video: "<<frameCount/30<<" seconds"<<endl;
