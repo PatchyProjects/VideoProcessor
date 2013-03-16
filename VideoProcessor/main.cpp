@@ -48,6 +48,7 @@ int main(int argc, char* argv[])
 
 	Mat firstFrame;
 	cap >> firstFrame;
+	processFrame.isTagFrame(firstFrame);
 	processFrame.basicLayout(firstFrame);
 	processFrame.printLocations();
 	for(int i = 1; i < frameCount; i++) 
@@ -57,10 +58,14 @@ int main(int argc, char* argv[])
 
         imshow("video", frame);
 
-		processFrame.doWork(frame);
+		processFrame.process(frame);
 		
 		for(int j = 0; j < 16; j++) //write averaged RGB values to file in CSV format
 		{
+			Color originalColor = Color(processFrame.rFrameVals[j],processFrame.gFrameVals[j],processFrame.bFrameVals[j]);
+			Color correctedColor = processFrame.gammaCorrect(originalColor);
+			cout<<"Original: "<<processFrame.rFrameVals[j]<<","<<processFrame.gFrameVals[j]<<","<<processFrame.bFrameVals[j]<<" ";
+			cout<<"Processed: "<<correctedColor.r<<","<<correctedColor.g<<","<<correctedColor.b<<endl;
 			frameFile<<processFrame.rFrameVals[j]<<","<<processFrame.gFrameVals[j]<<","<<processFrame.bFrameVals[j]<<" ";
 		}
 		frameFile<<endl; 
