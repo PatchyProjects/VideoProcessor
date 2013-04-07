@@ -15,12 +15,27 @@ using std::cin;
 using std::endl;
 using std::ofstream;
 
+// Cuts off extention so we can name the output file
+string getFileName(string fileNameAndExt)
+{
+	string fileName;
+	//string fileName = strtok(fileNameAndExt,".");
+	for(int i = 0; i<fileNameAndExt.size(); i++)
+	{
+		if(fileNameAndExt[i] == '.')
+			break;
+		fileName += fileNameAndExt[i];
+	}
+	return fileName;
+}
+
 int main(int argc, char* argv[])
 {
 	//string videoFile = "testColorMix.avi";
 	string videoFile;
 	cout<<"Enter Video File Name (ex. testColorMix.avi): ";
 	std::cin>>videoFile;
+	cout<<"File Name: "<<getFileName(videoFile)<<endl;
 	cout<<"Opening "<<videoFile<<"..."<<endl;
 	VideoCapture cap(videoFile);		//Open Video File
 	if(!cap.isOpened())  // check if we succeeded
@@ -31,8 +46,9 @@ int main(int argc, char* argv[])
 	cout<<"Video Opened Successfully!"<<endl;
 	
 	cout<<"Creating CSV File..."<<endl;
+	string frameFileName = getFileName(videoFile) + ".txt";
 	ofstream frameFile;
-	frameFile.open ("frameFile.txt");
+	frameFile.open (frameFileName);
 	if (!frameFile.is_open()) //error opening writefile
 	{
 		cout<<"Error Opening CSV file"<<endl;

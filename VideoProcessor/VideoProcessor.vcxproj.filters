@@ -49,5 +49,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
+    <None Include="..\Debug\opencv_ffmpeg200.dll">
+      <Filter>dlls</Filter>
+    </None>
   </ItemGroup>
 </Project>

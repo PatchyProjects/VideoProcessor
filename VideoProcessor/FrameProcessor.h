@@ -267,6 +267,7 @@ class FrameProcessor
 
 		int ledLoc = 0; //led location, max = 16;
 		
+		colorCorrect();
 		int HEIGHT = processed.getHeight();
 		int WIDTH = processed.getWidth();
 		for(int i = 0; i<4; i++)
@@ -277,7 +278,7 @@ class FrameProcessor
 				{
 					for(int y = i*HEIGHT/8; y < (i+1)*HEIGHT/8; y++)
 					{
-						processed.set(x,y,rVec[ledLoc],gVec[ledLoc],bVec[ledLoc]);
+						processed.set(x,y,rFrameVals[ledLoc],gFrameVals[ledLoc],bFrameVals[ledLoc]);
 					}
 				}
 				ledLoc++;
@@ -374,6 +375,7 @@ class FrameProcessor
 
 		return correctedVal;
 	}
+
 	Color gammaCorrect(Color& originalColor)
 	{
 		//cout<<"RGB Original: "<<originalColor.r<<" "<<originalColor.g<<" "<<originalColor.b<<" "<<endl;
