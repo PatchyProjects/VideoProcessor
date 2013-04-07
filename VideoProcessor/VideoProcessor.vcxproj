@@ -52,7 +52,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>C:\Program Files\OpenCV2.0\lib\cv200.lib;C:\Program Files\OpenCV2.0\lib\cxcore200.lib;C:\Program Files\OpenCV2.0\lib\highgui200.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\Program Files\OpenCV2.0\lib\cv200.lib;C:\Program Files\OpenCV2.0\lib\cxcore200.lib;C:\Program Files\OpenCV2.0\lib\highgui200.lib;C:\Program Files\OpenCV2.0\lib\opencv_ffmpeg200.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -77,6 +77,13 @@
     <ClInclude Include="FrameProcessor.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="Rect.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="VideoProcessor.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <math.h>
+#include <string>
 
 
 using namespace std;
@@ -57,7 +58,7 @@ class FrameProcessor
 	{
 		for(int i = 0; i<ledLocationVec.size(); i++)
 		{
-			cout<<"LED"<<i<<endl;
+			cout<<"LED"<<i+1<<endl;
 			cout<<"Top("<<ledLocationVec[i].topX<<","<<ledLocationVec[i].topY<<")"<<endl;
 			cout<<"Bottom("<<ledLocationVec[i].bottomX<<","<<ledLocationVec[i].bottomY<<")"<<endl;
 		}
@@ -100,10 +101,107 @@ class FrameProcessor
 		cout<<"its NOT a tag frame"<<endl;
 		return false;
 	}
+	
+	int getLEDWidth(Mat &frame, Color &tagColor, int iniX, int iniY)
+	{
+		int WIDTH = processed.getWidth();
+		int HEIGHT = processed.getHeight();
 
+		int tagWidth = 0;
+		bool scan = true;
+		int x = iniX;
+		int y = iniY;
+		while(scan)
+		{
+			if( x+1 > WIDTH)	// Out of Bounds
+				scan = false;
+			else
+			{
+				Color currentColor = processed.get(x,y);
+				scan = isColorMatch(tagColor,currentColor);
+				if(scan)
+					x++;
+			}
+		}
+		return x - iniX;
+	}
+	int getLEDHeight(Mat &frame, Color &tagColor, int iniX, int iniY)
+	{
+		int WIDTH = processed.getWidth();
+		int HEIGHT = processed.getHeight();
+
+		int tagWidth = 0;
+		bool scan = true;
+		int x = iniX;
+		int y = iniY;
+		while(scan)
+		{
+			if( y+1 > HEIGHT)	// Out of Bounds
+				scan = false;
+			else
+			{
+				Color currentColor = processed.get(x,y);
+				scan = isColorMatch(tagColor,currentColor);
+				if(scan)
+					y++;
+			}
+		}
+		return y - iniY;
+	}
 	void locateLEDLocations(Mat &frame)
 	{
 		vector<Color> ledTagColors;
+		ledTagColors.push_back(LED1Tag);
+		ledTagColors.push_back(LED2Tag);
+		ledTagColors.push_back(LED3Tag);
+		ledTagColors.push_back(LED4Tag);
+		ledTagColors.push_back(LED5Tag);
+		ledTagColors.push_back(LED6Tag);
+		ledTagColors.push_back(LED7Tag);
+		ledTagColors.push_back(LED8Tag);
+		ledTagColors.push_back(LED9Tag);
+		ledTagColors.push_back(LED10Tag);
+		ledTagColors.push_back(LED11Tag);
+		ledTagColors.push_back(LED12Tag);
+		ledTagColors.push_back(LED13Tag);
+		ledTagColors.push_back(LED14Tag);
+		ledTagColors.push_back(LED15Tag);
+		ledTagColors.push_back(LED16Tag);
+
+		int HEIGHT = processed.getHeight();
+		int WIDTH = processed.getWidth();
+
+		for(int i = 0; i < ledTagColors.size(); i++)
+		{
+			bool tagFound = false;
+			LED foundLED;	// I really should make LED a class instead of a struct
+			for(int j = 0; j < WIDTH; j++)
+			{
+				for(int k = 0; k < HEIGHT; k++)
+				{
+					Color currentColor = processed.get(j,k);
+					tagFound = isColorMatch(currentColor,ledTagColors[i]);
+					if(tagFound)
+					{
+						foundLED.topX = j;
+						foundLED.topY = k;
+						foundLED.bottomX = j + getLEDWidth(frame,ledTagColors[i],j+2,k+2);
+						foundLED.bottomY = k + getLEDHeight(frame,ledTagColors[i],j+2,k+2);
+						break;
+					}
+				} // k
+				if(tagFound)
+					break;
+			} // j
+			if(!tagFound)
+			{
+				foundLED.topX = 0;		// NEED TO MAKE SPECIAL CASE SO LED IS ALWAYS OFF IN THIS CASE
+				foundLED.topY = 0;
+				foundLED.bottomX = 0;
+				foundLED.bottomY = 0;
+			}
+			ledLocationVec.push_back(foundLED);
+		} // i
 
 	}
 	
@@ -166,6 +264,29 @@ class FrameProcessor
 		rFrameVals = rVec;
 		gFrameVals = gVec;
 		bFrameVals = bVec;
+
+		int ledLoc = 0; //led location, max = 16;
+		
+		int HEIGHT = processed.getHeight();
+		int WIDTH = processed.getWidth();
+		for(int i = 0; i<4; i++)
+		{
+			for(int j = 0; j<4; j++)
+			{
+				for(int x = j*WIDTH/8; x < (j+1)*WIDTH/8; x++)
+				{
+					for(int y = i*HEIGHT/8; y < (i+1)*HEIGHT/8; y++)
+					{
+						processed.set(x,y,rVec[ledLoc],gVec[ledLoc],bVec[ledLoc]);
+					}
+				}
+				ledLoc++;
+			} //j
+		} //i
+
+		//show the processed image
+		imshow("processed", processed.getImage());
+		cvWaitKey(5);
 
 		return true;
 	}
@@ -234,18 +355,82 @@ class FrameProcessor
 		return true;
 	}
 	
+	// Applies gamma correction on the frame
+	void colorCorrect()
+	{
+		for(int i = 0; i < rFrameVals.size(); i++)
+		{
+			rFrameVals[i] = gammaCorrect(rFrameVals[i]);
+			gFrameVals[i] = gammaCorrect(gFrameVals[i]);
+			bFrameVals[i] = gammaCorrect(bFrameVals[i]);
+		}
+	}
+	
+	int gammaCorrect(int colorVal)
+	{
+		float gammaVal = 2.5;
+
+		int correctedVal = 255 * pow( ((float)colorVal)/255,1/gammaVal);
+
+		return correctedVal;
+	}
 	Color gammaCorrect(Color& originalColor)
 	{
-		cout<<"RGB Original: "<<originalColor.r<<" "<<originalColor.g<<" "<<originalColor.b<<" "<<endl;
+		//cout<<"RGB Original: "<<originalColor.r<<" "<<originalColor.g<<" "<<originalColor.b<<" "<<endl;
 		float gammaVal = 2.5;		// Determined experimentally
-		//float rFactor = ((float)originalColor.r)/255;
-		//cout<<"Correction Factor Printout: "<<rFactor<<" "<<pow((float)(originalColor.g/255),1/gammaVal)<<" "<<pow((float)(originalColor.b/255),1/gammaVal)<<endl;
+		
 		int correctR = 255 * pow( ((float)originalColor.r)/255,1/gammaVal);
 		int correctG = 255 * pow( ((float)originalColor.g)/255,1/gammaVal);
 		int correctB = 255 * pow( ((float)originalColor.b)/255,1/gammaVal);
 
 		return Color(correctR,correctG,correctB);
+	}
 
+	// creates string corresponding to RGB values of frame 
+	// string is in Hex format: R1,G1,B1,R2,G2,B2...R16,G16,B16
+	String getFrameString()
+	{
+		String frameStr;
+		for(int i = 0; i<rFrameVals.size(); i++)
+		{
+			frameStr += intToHex(rFrameVals[i]);
+			frameStr += ",";
+			frameStr += intToHex(gFrameVals[i]);
+			frameStr += ",";
+			frameStr += intToHex(bFrameVals[i]);
+			if(i < rFrameVals.size()-1)				// last val shouldn't have a comma
+				frameStr += ",";
+		}
+		return frameStr;
+	}
+
+	// Converts int to a 2 digit Hex String
+	// Variable Format: 0xFA  A is first digit F is second digit 
+	string intToHex(int num)
+	{
+			if(num > 255)             // prevents unusable values
+				num = 255;
+			else if(num < 0)
+				num = 0;
+       
+		   int firstNum = num%16;
+		   int secondNum = num/16;
+		   char firstChar,secondChar;
+       
+		   if(firstNum > 9)
+				firstChar = 'A' + firstNum - 10;
+		   else
+				firstChar = '0' + firstNum; 
+       
+		   if(secondNum > 9)
+				secondChar = 'A' + secondNum - 10;
+		   else
+				secondChar = '0' + secondNum;     
+           
+		   string hexStr;
+		   hexStr +=secondChar;
+		   hexStr += firstChar;
+		   return hexStr;               
 	}
 
 

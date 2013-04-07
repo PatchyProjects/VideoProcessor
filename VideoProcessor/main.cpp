@@ -48,8 +48,10 @@ int main(int argc, char* argv[])
 
 	Mat firstFrame;
 	cap >> firstFrame;
-	processFrame.isTagFrame(firstFrame);
-	processFrame.basicLayout(firstFrame);
+	if(processFrame.isTagFrame(firstFrame))
+		processFrame.locateLEDLocations(firstFrame);
+	else
+		processFrame.basicLayout(firstFrame);
 	processFrame.printLocations();
 	for(int i = 1; i < frameCount; i++) 
     {
@@ -59,16 +61,22 @@ int main(int argc, char* argv[])
         imshow("video", frame);
 
 		processFrame.process(frame);
-		
+		//processFrame.colorCorrect();		// Apply gamma Correction
+		frameFile<<processFrame.getFrameString()<<endl;
+		/*
 		for(int j = 0; j < 16; j++) //write averaged RGB values to file in CSV format
 		{
 			Color originalColor = Color(processFrame.rFrameVals[j],processFrame.gFrameVals[j],processFrame.bFrameVals[j]);
 			Color correctedColor = processFrame.gammaCorrect(originalColor);
-			cout<<"Original: "<<processFrame.rFrameVals[j]<<","<<processFrame.gFrameVals[j]<<","<<processFrame.bFrameVals[j]<<" ";
-			cout<<"Processed: "<<correctedColor.r<<","<<correctedColor.g<<","<<correctedColor.b<<endl;
+			//cout<<"Original: "<<processFrame.rFrameVals[j]<<","<<processFrame.gFrameVals[j]<<","<<processFrame.bFrameVals[j]<<" ";
+			//cout<<"Processed: "<<correctedColor.r<<","<<correctedColor.g<<","<<correctedColor.b<<endl;
 			frameFile<<processFrame.rFrameVals[j]<<","<<processFrame.gFrameVals[j]<<","<<processFrame.bFrameVals[j]<<" ";
+			
 		}
 		frameFile<<endl; 
+		*/
+		
+		
 
     }
     
