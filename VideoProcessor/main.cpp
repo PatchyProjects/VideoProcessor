@@ -19,7 +19,7 @@ using std::ofstream;
 string getFileName(string fileNameAndExt)
 {
 	string fileName;
-	//string fileName = strtok(fileNameAndExt,".");
+
 	for(int i = 0; i<fileNameAndExt.size(); i++)
 	{
 		if(fileNameAndExt[i] == '.')
@@ -31,14 +31,14 @@ string getFileName(string fileNameAndExt)
 
 int main(int argc, char* argv[])
 {
-	//string videoFile = "testColorMix.avi";
 	string videoFile;
 	cout<<"Enter Video File Name (ex. testColorMix.avi): ";
 	std::cin>>videoFile;
 	cout<<"File Name: "<<getFileName(videoFile)<<endl;
 	cout<<"Opening "<<videoFile<<"..."<<endl;
+	
 	VideoCapture cap(videoFile);		//Open Video File
-	if(!cap.isOpened())  // check if we succeeded
+	if(!cap.isOpened())					// check if we succeeded
 	{
 		cout<<"Error Opening Video"<<endl;
         return -1;
@@ -55,6 +55,8 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 	
+	frameFile<<"XG";				// output file must start with "X"
+
 	FrameProcessor processFrame;
 
     namedWindow("video",1);
@@ -78,7 +80,12 @@ int main(int argc, char* argv[])
 
 		processFrame.process(frame);
 		//processFrame.colorCorrect();		// Apply gamma Correction
-		frameFile<<processFrame.getFrameString()<<endl;
+		frameFile<<processFrame.getFrameString();
+		//if( (i-1)%30  == 0)
+			
+
+		if(i != frameCount-1)				// We don't want new line on the last line of file
+			frameFile<<endl;
 		/*
 		for(int j = 0; j < 16; j++) //write averaged RGB values to file in CSV format
 		{
@@ -96,9 +103,23 @@ int main(int argc, char* argv[])
 
     }
     
+	frameFile<<"Y";				// output file must end with "Y"
+
 	frameFile.close();
 	cout<<"Number of frames processed: "<<frameCount<<endl;
 	cout<<"Approx. length of video: "<<frameCount/30<<" seconds"<<endl;
+
+	vector<vector<int>> processedRVals = processFrame.processedRVals;
+	vector<vector<int>> processedGVals = processFrame.processedGVals;
+	vector<vector<int>> processedBVals = processFrame.processedBVals;
+
+	for(int replay = 0; replay< 5; replay++)
+	{
+		//for(int i = 0; i<processedRVals.size(); i++)
+		//{
+			processFrame.replayVideo(firstFrame);		//Reuse first frame to draw on
+		//}
+	}
 
 	int waiting;
 	cout<<"Video Processing Complete!";

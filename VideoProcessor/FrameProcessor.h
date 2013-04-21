@@ -40,7 +40,45 @@ struct LED
 class FrameProcessor
 {
 	public:
+	
+	/**********************************
+		For processed replay **********
+	**********************************/
+	vector<vector<int>> processedRVals;
+	vector<vector<int>> processedGVals;
+	vector<vector<int>> processedBVals;
 
+	void replayVideo(Mat& frame)
+	{
+		processed(frame);
+		int ledLoc = 0; //led location, max = 16;
+		
+		//colorCorrect();
+		int HEIGHT = processed.getHeight();
+		int WIDTH = processed.getWidth();
+		
+		for(int frameNum = 0; frameNum < processedRVals.size(); frameNum++)
+		{
+			for(int i = 0; i<4; i++)
+			{
+				for(int j = 0; j<4; j++)
+				{
+					for(int x = j*WIDTH/4; x < (j+1)*WIDTH/4; x++)
+					{
+						for(int y = i*HEIGHT/4; y < (i+1)*HEIGHT/4; y++)
+						{
+							processed.set(x,y,processedRVals[frameNum][ledLoc],processedGVals[frameNum][ledLoc],processedBVals[frameNum][ledLoc]);
+						}
+					}
+					ledLoc++;
+				} //j
+			} //i
+			
+			imshow("processed", processed.getImage());		//show the processed image
+			cvWaitKey(1);
+			ledLoc = 0;
+		} // frame
+	}
 
 	FrameProcessor():
 	  myChar(0)
@@ -48,7 +86,7 @@ class FrameProcessor
 		//make a new window to show our processed results
 		namedWindow("processed",1);
 	}
-	//  Rect myRect = new Rect(0,0,15,15); 
+
 	vector<LED> ledLocationVec;
 	vector<int> rFrameVals;
 	vector<int> bFrameVals;
@@ -264,10 +302,16 @@ class FrameProcessor
 		rFrameVals = rVec;
 		gFrameVals = gVec;
 		bFrameVals = bVec;
+		
+		colorCorrect();
+		
+		processedRVals.push_back(rFrameVals);
+		processedGVals.push_back(gFrameVals);
+		processedBVals.push_back(bFrameVals);
 
 		int ledLoc = 0; //led location, max = 16;
 		
-		colorCorrect();
+		
 		int HEIGHT = processed.getHeight();
 		int WIDTH = processed.getWidth();
 		for(int i = 0; i<4; i++)
@@ -351,7 +395,7 @@ class FrameProcessor
 		
 		//show the processed image
 		imshow("processed", processed.getImage());
-		cvWaitKey(30);
+		cvWaitKey(1);
 
 		return true;
 	}
@@ -397,10 +441,20 @@ class FrameProcessor
 		{
 			frameStr += intToHex(rFrameVals[i]);
 			frameStr += ",";
+			//frameStr += intToHex(gFrameVals[i]);
+			//frameStr += ",";
+			//frameStr += intToHex(bFrameVals[i]);
+			//if(i < rFrameVals.size()-1)				// last val shouldn't have a comma
+				//frameStr += ",";
+		}
+		for(int i = 0; i<gFrameVals.size(); i++)
+		{
 			frameStr += intToHex(gFrameVals[i]);
-			frameStr += ",";
+				frameStr += ",";
+		}
+		for(int i = 0; i<bFrameVals.size(); i++)
+		{
 			frameStr += intToHex(bFrameVals[i]);
-			if(i < rFrameVals.size()-1)				// last val shouldn't have a comma
 				frameStr += ",";
 		}
 		return frameStr;
